@@ -160,24 +160,62 @@
       particles.forEach((p, i) => { p.life--; p.x += p.vx; p.y += p.vy; p.size *= 0.96; if (p.life <= 0) particles.splice(i, 1); });
     }
 
-    function draw() {
-      ctx.clearRect(0, 0, WIDTH, HEIGHT);
-      particles.forEach(p => {
-        ctx.globalAlpha = p.life / p.maxLife;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-        ctx.fillStyle = p.color; ctx.fill(); ctx.closePath(); ctx.globalAlpha = 1;
-      });
-      ctx.beginPath(); ctx.arc(nk.x, nk.y, nk.r, 0, Math.PI*2);
-      ctx.fillStyle = '#4dabf7'; ctx.fill(); ctx.closePath();
-      enemies.forEach(e => { ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI*2); ctx.fillStyle = '#f03e3e'; ctx.fill(); ctx.closePath(); });
-      safeCells.forEach(c => { ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI*2); ctx.fillStyle = '#63b37a'; ctx.fill(); ctx.closePath(); });
 
-      // Draw author name at bottom inside canvas
-      ctx.font = '12px Comic Sans MS';
-      ctx.fillStyle = '#000000';
+  function draw() {
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    particles.forEach(p => {
+      ctx.globalAlpha = p.life / p.maxLife;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+      ctx.closePath();
+      ctx.globalAlpha = 1;
+    });
+
+    ctx.beginPath();
+    ctx.arc(nk.x, nk.y, nk.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#4dabf7';
+    ctx.fill();
+    ctx.closePath();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 14px Comic Sans MS';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('NC', nk.x, nk.y);
+
+    enemies.forEach(e => {
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+      ctx.fillStyle = '#f03e3e';
+      ctx.fill();
+      ctx.closePath();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px Comic Sans MS';
       ctx.textAlign = 'center';
-      ctx.fillText(authorName, WIDTH / 2, HEIGHT - 10);
-    }
+      ctx.textBaseline = 'middle';
+      ctx.fillText('C', e.x, e.y);
+    });
+
+    safeCells.forEach(c => {
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.fillStyle = '#63b37a';
+      ctx.fill();
+      ctx.closePath();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px Comic Sans MS';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('H', c.x, c.y);
+    });
+
+    ctx.font = '12px Comic Sans MS';
+    ctx.fillStyle = '#000000';
+    ctx.textAlign = 'center';
+    ctx.fillText(authorName, WIDTH / 2, HEIGHT - 10);
+  }
 
     function levelUp() { level++; spawnInterval = Math.max(500, spawnInterval - 150); levelEl.textContent = level; }
     function particlesEffect(x, y, col) { for (let i = 0; i < 8; i++) particles.push({ x, y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, size: 4+Math.random()*4, color: col, life: 20, maxLife: 20 }); }
