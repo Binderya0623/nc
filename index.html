@@ -33,7 +33,6 @@
 </head>
 <body>
   <canvas id="gameCanvas" width="800" height="600" tabindex="0"></canvas>
-  <div id="credit">Б. Даваасүрэн</div>
   <div id="ui">
     <span id="score">0</span>
     <span id="health">3</span>
@@ -41,7 +40,7 @@
     <span id="timer">0s</span>
   </div>
   <div id="overlay">
-    <div id="message">Click to Start</div>
+    <div id="message">Товчлуур дээр дарж тоглоомыг эхлүүлнэ үү.</div>
     <button id="startBtn" class="btn">Эхлэх</button>
   </div>
 
@@ -60,6 +59,7 @@
     let score, health, level, spawnInterval, lastSpawn;
     let gamePaused = true, gameOver = false;
     let startTime = 0;
+    const authorName = 'Тоглоомыг бэлтгэсэн Б. Даваасүрэн';
 
     const nk = { x: WIDTH/2, y: HEIGHT/2, r: 18, speed: 4 };
     const enemies = [], safeCells = [], particles = [];
@@ -77,7 +77,7 @@
       updateUI();
       if (showOverlay) {
         overlay.style.display = 'flex';
-        message.textContent = 'Товчлуур дээр дарна уу';
+        message.textContent = 'Товчлуур дээр дарж тоглоомыг эхлүүлнэ үү.';
       }
       gamePaused = true;
       gameOver = false;
@@ -117,12 +117,7 @@
       const y = Math.random()*(HEIGHT-2*r)+r;
       const speed = (1 + Math.random()*1.2) + level*0.1;
       const angle = Math.random()*Math.PI*2;
-      const cell = {
-        x, y, r,
-        vx: Math.cos(angle)*speed,
-        vy: Math.sin(angle)*speed,
-        type: isCancer ? 'cancer' : 'healthy'
-      };
+      const cell = { x, y, r, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, type: isCancer ? 'cancer' : 'healthy' };
       (isCancer ? enemies : safeCells).push(cell);
     }
 
@@ -130,12 +125,7 @@
       if (gamePaused) return;
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
       timerEl.textContent = `${elapsed}s`;
-
-      // End game when 1 minute (60 seconds) is reached
-      if (elapsed >= 60) {
-        finishGame();
-        return;
-      }
+      if (elapsed >= 60) { finishGame(); return; }
 
       if (keys['ArrowUp']||keys['w']) nk.y -= nk.speed;
       if (keys['ArrowDown']||keys['s']) nk.y += nk.speed;
@@ -144,64 +134,56 @@
       nk.x = Math.max(nk.r, Math.min(WIDTH - nk.r, nk.x));
       nk.y = Math.max(nk.r, Math.min(HEIGHT - nk.r, nk.y));
 
-      if (Date.now() - lastSpawn > spawnInterval) {
-        spawn();
-        lastSpawn = Date.now();
-      }
+      if (Date.now() - lastSpawn > spawnInterval) { spawn(); lastSpawn = Date.now(); }
 
       enemies.forEach((e, i) => {
-        e.x += e.vx;
-        e.y += e.vy;
+        e.x += e.vx; e.y += e.vy;
         if (e.x < e.r || e.x > WIDTH - e.r) e.vx *= -1;
         if (e.y < e.r || e.y > HEIGHT - e.r) e.vy *= -1;
         if (Math.hypot(nk.x - e.x, nk.y - e.y) < nk.r + e.r) {
-          score++;
-          particlesEffect(e.x, e.y, '#ff6b6b');
-          enemies.splice(i, 1);
-          if (score % 10 === 0) levelUp();
-          updateUI();
+          score++; particlesEffect(e.x, e.y, '#ff6b6b'); enemies.splice(i, 1);
+          if (score % 10 === 0) levelUp(); updateUI();
         }
       });
 
       safeCells.forEach((c, i) => {
-        c.x += c.vx;
-        c.y += c.vy;
+        c.x += c.vx; c.y += c.vy;
         if (c.x < c.r || c.x > WIDTH - c.r) c.vx *= -1;
         if (c.y < c.r || c.y > HEIGHT - c.r) c.vy *= -1;
         if (Math.hypot(nk.x - c.x, nk.y - c.y) < nk.r + c.r) {
           health--; score = Math.max(0, score - 1);
-          particlesEffect(c.x, c.y, '#74c69d');
-          safeCells.splice(i, 1);
-          updateUI();
+          particlesEffect(c.x, c.y, '#74c69d'); safeCells.splice(i, 1); updateUI();
           if (health <= 0) finishGame();
         }
       });
 
-      particles.forEach((p, i) => {
-        p.life--; p.x += p.vx; p.y += p.vy; p.size *= 0.96;
-        if (p.life <= 0) particles.splice(i, 1);
-      });
+      particles.forEach((p, i) => { p.life--; p.x += p.vx; p.y += p.vy; p.size *= 0.96; if (p.life <= 0) particles.splice(i, 1); });
     }
 
     function draw() {
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
-      particles.forEach(p => { ctx.globalAlpha = p.life / p.maxLife; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fillStyle = p.color; ctx.fill(); ctx.closePath(); ctx.globalAlpha = 1; });
-      ctx.beginPath(); ctx.arc(nk.x, nk.y, nk.r, 0, Math.PI*2); ctx.fillStyle = '#4dabf7'; ctx.fill(); ctx.closePath();
+      particles.forEach(p => {
+        ctx.globalAlpha = p.life / p.maxLife;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+        ctx.fillStyle = p.color; ctx.fill(); ctx.closePath(); ctx.globalAlpha = 1;
+      });
+      ctx.beginPath(); ctx.arc(nk.x, nk.y, nk.r, 0, Math.PI*2);
+      ctx.fillStyle = '#4dabf7'; ctx.fill(); ctx.closePath();
       enemies.forEach(e => { ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI*2); ctx.fillStyle = '#f03e3e'; ctx.fill(); ctx.closePath(); });
       safeCells.forEach(c => { ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI*2); ctx.fillStyle = '#63b37a'; ctx.fill(); ctx.closePath(); });
+
+      // Draw author name at bottom inside canvas
+      ctx.font = '12px Comic Sans MS';
+      ctx.fillStyle = '#000000';
+      ctx.textAlign = 'center';
+      ctx.fillText(authorName, WIDTH / 2, HEIGHT - 10);
     }
 
     function levelUp() { level++; spawnInterval = Math.max(500, spawnInterval - 150); levelEl.textContent = level; }
-    function particlesEffect(x, y, col) { for (let i = 0; i < 8; i++) { particles.push({ x, y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, size: 4+Math.random()*4, color: col, life: 20, maxLife: 20 }); }}
+    function particlesEffect(x, y, col) { for (let i = 0; i < 8; i++) particles.push({ x, y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, size: 4+Math.random()*4, color: col, life: 20, maxLife: 20 }); }
     function finishGame() { gamePaused = true; gameOver = true; message.textContent = `Тоглоом дууслаа! Оноо: ${score}`; overlay.style.display = 'flex'; }
 
-    startBtn.addEventListener('click', () => {
-      if (gameOver) init(false);
-      overlay.style.display = 'none';
-      startTime = Date.now();
-      gamePaused = false;
-    });
-
+    startBtn.addEventListener('click', () => { if (gameOver) init(false); overlay.style.display = 'none'; startTime = Date.now(); gamePaused = false; });
     function loop() { update(); draw(); requestAnimationFrame(loop); }
     init(); requestAnimationFrame(loop);
   </script>
